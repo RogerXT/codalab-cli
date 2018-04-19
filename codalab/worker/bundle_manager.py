@@ -277,7 +277,7 @@ class BundleManager(object):
             else:
                 workers_list = workers.user_owned_workers(self._model.root_user_id)
 
-            workers_list = self._filter_and_sort_workers(workers_list, bundle)
+            # workers_list = self._filter_and_sort_workers(workers_list, bundle)
 
             for worker in workers_list:
                 if self._try_start_bundle(workers, worker, bundle):
