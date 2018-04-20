@@ -31,8 +31,8 @@ class DefaultBundleManager(BundleManager):
         self._fail_on_too_many_resources(workers)
 
         # Schedule, preferring user-owned workers.
-        self._schedule_run_bundles_on_workers(workers, user_owned=True)
-        self._schedule_run_bundles_on_workers(workers, user_owned=False)
+        self._schedule_run_bundles_on_workers(workers)
+        # self._schedule_run_bundles_on_workers(workers, user_owned=False)
 
     def _check_resource_failure(self, value, user_fail_string=None, global_fail_string=None, user_max=None, global_max=None):
         if value:

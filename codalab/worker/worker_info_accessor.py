@@ -8,7 +8,9 @@ class WorkerInfoAccessor(object):
         self._workers = workers
         self._uuid_to_worker = {}
         self._user_id_to_workers = defaultdict(list)
+        self.user_ids = []
         for worker in self._workers:
+            self.user_ids.append(worker['user_id'])
             for uuid in worker['run_uuids']:
                 self._uuid_to_worker[uuid] = worker
             self._user_id_to_workers[worker['user_id']].append(worker)

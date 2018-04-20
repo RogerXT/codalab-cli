@@ -99,8 +99,9 @@ def check_run_permission(bundle):
     """
     Checks whether the current user can run the bundle.
     """
-    if not check_bundle_have_run_permission(local.model, request.user.user_id, bundle):
-        abort(httplib.FORBIDDEN, 'User does not have permission to run bundle.')
+    pass
+    #if not check_bundle_have_run_permission(local.model, request.user.user_id, bundle):
+    #    abort(httplib.FORBIDDEN, 'User does not have permission to run bundle.')
 
 
 @post('/workers/<worker_id>/start_bundle/<uuid:re:%s>' % spec_util.UUID_STR,

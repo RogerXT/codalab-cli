@@ -265,17 +265,20 @@ class BundleManager(object):
                 self._model.set_offline_bundle(bundle)
             """
 
-    def _schedule_run_bundles_on_workers(self, workers, user_owned):
+    def _schedule_run_bundles_on_workers(self, workers):
         """
         Schedules STAGED bundles to run on the given workers. If user_owned is
         True, then schedules on workers run by the owner of each bundle.
         Otherwise, uses CodaLab-owned workers, which have user ID root_user_id.
         """
         for bundle in self._model.batch_get_bundles(state=State.STAGED, bundle_type='run'):
-            if user_owned:
-                workers_list = workers.user_owned_workers(bundle.owner_id)
+            if len(workers.user_ids) > 0:
+                user_id = workers.user_ids[0]
             else:
-                workers_list = workers.user_owned_workers(self._model.root_user_id)
+                user_id = '0'
+
+            workers_list = workers.user_owned_workers(user_id)
+
 
             # workers_list = self._filter_and_sort_workers(workers_list, bundle)
 

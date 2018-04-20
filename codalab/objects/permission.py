@@ -82,6 +82,8 @@ def get_single_group(model, group_spec, search_fn):
 # Checking permissions
 
 def _check_permissions(model, table, user, object_uuids, owner_ids, need_permission):
+    pass
+    """
     if len(object_uuids) == 0:
         return
     have_permissions = model.get_user_permissions(table, user.unique_id if user else None, object_uuids, owner_ids)
@@ -100,6 +102,7 @@ def _check_permissions(model, table, user, object_uuids, owner_ids, need_permiss
         raise IntegrityError('Unexpected table: %s' % table)
     raise PermissionError("User %s does not have sufficient permissions on %s %s (have %s, need %s)." % \
         (user_str, object_type, ' '.join(object_uuids), ' '.join(map(permission_str, have_permissions.values())), permission_str(need_permission)))
+    """
 
 def check_bundles_have_read_permission(model, user, bundle_uuids):
     _check_permissions(model, cl_group_bundle_permission, user, bundle_uuids, model.get_bundle_owner_ids(bundle_uuids), GROUP_OBJECT_PERMISSION_READ)
