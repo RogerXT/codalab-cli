@@ -1297,8 +1297,8 @@ class BundleCLI(object):
         metadata = self.get_missing_metadata(RunBundle, args)
 
         docker_image = metadata.get('request_docker_image', None)
-        if not docker_image:
-            raise UsageError('--request-docker-image [docker-image] must be specified')
+        #if not docker_image:
+        #    raise UsageError('--request-docker-image [docker-image] must be specified')
 
         uuid = generate_uuid()
         bundle_path = os.path.join(self.manager.codalab_home, 'local_bundles', uuid)

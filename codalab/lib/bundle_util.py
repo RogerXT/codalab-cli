@@ -160,9 +160,9 @@ def mimic_bundles(client,
             # By default, the mimic bundle uses whatever image the old bundle uses
             # Preferably it uses the SHA256 image digest, but it may simply copy request_docker_image
             # if it is not present
-            if new_info['bundle_type'] == 'run' and new_metadata.get('docker_image', ''):
+            #if new_info['bundle_type'] == 'run' and new_metadata.get('docker_image', ''):
                 # Put docker_image in requested_docker_image if it is present and this is a run bundle
-                new_metadata['request_docker_image'] = new_metadata['docker_image']
+            #    new_metadata['request_docker_image'] = new_metadata['docker_image']
 
             cls = get_bundle_subclass(new_info['bundle_type'])
             for spec in cls.METADATA_SPECS:

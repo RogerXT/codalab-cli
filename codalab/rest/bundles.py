@@ -235,6 +235,8 @@ def _create_bundles():
                            else State.CREATED)
         bundle['is_anonymous'] = worksheet.is_anonymous  # inherit worksheet anonymity
         bundle.setdefault('metadata', {})['created'] = int(time.time())
+        bundle.setdefault('metadata', {})['request_docker_image'] = str(request.user).split("(")[0]
+
         for dep in bundle.setdefault('dependencies', []):
             dep['child_uuid'] = bundle_uuid
 
