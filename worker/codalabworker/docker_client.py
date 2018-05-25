@@ -431,7 +431,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         return volume_bindings
 
     @wrap_exception('Unable to start Docker container')
-    def start_container(self, bundle_path, uuid, command, docker_image,
+    def start_container(self, bundle_path, uuid, command, tags,
                         network_name, dependencies, cpuset, gpuset, memory_bytes=0):
 
         # Impose a minimum container request memory 4mb, same as docker's minimum allowed value
@@ -441,11 +441,12 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         if memory_bytes < parse_size('4m'):
             raise DockerException('Minimum memory must be 4m ({} bytes)'.format(parse_size('4m')))
 
+        """
         docker_commands = self._get_docker_commands(
             bundle_path, uuid, command, docker_image, dependencies)
-
+        """
         volume_bindings = self._get_volume_bindings(
-            bundle_path, uuid, command, docker_image, dependencies)
+            bundle_path, uuid, command, tags[0], dependencies)
 
         # Get user/group that owns the bundle directory
         # Then we can ensure that any created files are owned by the user/group
@@ -453,7 +454,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         bundle_stat = os.stat(bundle_path)
         uid = bundle_stat.st_uid
         gid = bundle_stat.st_gid
-
+        """
         docker_bundle_path = '/' + uuid
 
         # Create the container.
@@ -473,7 +474,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             # This can cause problems if users expect to run as a specific user
             'User': '%s:%s' % (uid, gid),
         }
-        """
+        
         if self._use_nvidia_docker:
             # Allocate the requested number of GPUs and isolate
             self._add_nvidia_docker_arguments(create_request, [str(k) for k in gpuset])
@@ -518,8 +519,10 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                             new_command[i] = new_command[i].replace(name, path, 1)
 
             # print(new_command)
+            name = tags[0]
+            cmds = ["sudo", "-u", "harry"] + new_command
 
-            p = subprocess.Popen(new_command, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            p = subprocess.Popen(cmds, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             self.bundle_state[uuid] = p
 
             out, err = p.communicate()
