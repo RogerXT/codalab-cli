@@ -508,6 +508,8 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             for bundle in bundles:
                 path = str(bundle[0])
                 name = str(bundle[1].split("/")[-1])
+                permit = subprocess.Popen(["sudo", "chmod", "-R", "777", path])
+                permit = subprocess.Popen(["sudo", "chmod", "777", path])
 
                 if name in new_command:    # file name
                     for i in range(len(new_command)):
@@ -520,6 +522,8 @@ nvidia-docker-plugin not available, no GPU support on this worker.
 
             # print(new_command)
             name = tags[0]
+            permit = subprocess.Popen(["sudo", "chmod", "-R", "777", bundle_path])
+
             cmds = ["sudo", "-u", "harry"] + new_command
 
             p = subprocess.Popen(cmds, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
