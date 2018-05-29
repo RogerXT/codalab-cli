@@ -524,7 +524,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             name = tags[0]
             permit = subprocess.Popen(["sudo", "chmod", "-R", "777", bundle_path])
 
-            cmds = ["sudo", "-u", "harry"] + new_command
+            cmds = ["sudo", "-u", "tianxie"] + new_command
 
             p = subprocess.Popen(cmds, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             self.bundle_state[uuid] = p
