@@ -499,17 +499,12 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             bundles = []
             for i in range(1, len(volume_bindings)):
                 bundles.append(volume_bindings[i].split(":"))
-            # [[u'/home/harry/codalab-worker-scratch/bundles/0x2c92295dfa584d91afaf49c3ca112116', u'/0xb0558b1cdc1b44728dc9b2c9bdb497e5_dependencies/hello.py', u'ro']]
-            # [[u'/home/harry/codalab-worker-scratch/bundles/0x42b3fa2c493e45a99eb079282453e561', u'/0x69adb4b9098b48b79364d12a710c013e_dependencies/_1', u'ro']]
-            # [[u'/home/harry/codalab-worker-scratch/bundles/0x83f82a13852e4a6483860b734e4e47d0', u'/0x106bdc96a1ef4802bc63eabb8ee35e9e_dependencies/hello', u'ro'], [u'/home/harry/codalab-worker-scratch/bundles/0x42b3fa2c493e45a99eb079282453e561', u'/0x106bdc96a1ef4802bc63eabb8ee35e9e_dependencies/_1', u'ro']]
-
             new_command = str(command).split()
 
             for bundle in bundles:
                 path = str(bundle[0])
                 name = str(bundle[1].split("/")[-1])
-                permit = subprocess.Popen(["sudo", "chmod", "-R", "777", path])
-                permit = subprocess.Popen(["sudo", "chmod", "777", path])
+                permit = subprocess.Popen(["chmod", "-R", "o+rx", path])
 
                 if name in new_command:    # file name
                     for i in range(len(new_command)):
@@ -522,9 +517,12 @@ nvidia-docker-plugin not available, no GPU support on this worker.
 
             # print(new_command)
             name = tags[0]
-            permit = subprocess.Popen(["sudo", "chmod", "-R", "777", bundle_path])
+            parent_path = "/".join(bundle_path.split("/")[:2])
+            print(parent_path)
+            permit = subprocess.Popen(["chmod", "-R", "o+rx", parent_path])
+            permit = subprocess.Popen(["chmod", "-R", "777", bundle_path])
 
-            cmds = ["sudo", "-u", "tianxie"] + new_command
+            cmds = ["sudo", "-u", "harry"] + new_command
 
             p = subprocess.Popen(cmds, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             self.bundle_state[uuid] = p
