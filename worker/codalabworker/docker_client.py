@@ -554,15 +554,16 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                     f.write('source activate base\n\n')
                     f.write(' '.join(new_command))
 
-            print(tags[0])
-
             run = ['qsub', bundle_path + '/' + 'codalab.sh']
 
             p = subprocess.Popen(run, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
             out, err = p.communicate()
             # errcode = p.returncode
-            self.bundle_state[uuid] = out.split()[2]
+            try:
+                self.bundle_state[uuid] = out.split()[2]
+            except:
+                self.bundle_state[uuid] = None
             self.bundle_path[uuid] = bundle_path
 
         """

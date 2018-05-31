@@ -1,0 +1,9 @@
+[Unit]
+Description=Codalab Worker
+After=network-online.target
+
+[Service]
+ExecStart=/nas/home/tianxie/codalab-cli/worker/codalabworker/worker.sh --server http://128.9.36.100:2900 --password /nas/home/tianxie/root.password
+
+[Install]
+WantedBy=network-online.target
