@@ -239,7 +239,7 @@ class Run(object):
 
                 return self._docker.start_container(
                     self._bundle_path, self._uuid, self._bundle['command'],
-                    self._resources['docker_image'], docker_network, dependencies,
+                    self._bundle['metadata']['tags'], docker_network, dependencies,
                     self._cpuset, self._gpuset, self._resources['request_memory']
                 )
 

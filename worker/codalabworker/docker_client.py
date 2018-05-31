@@ -437,7 +437,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         return volume_bindings
 
     @wrap_exception('Unable to start Docker container')
-    def start_container(self, bundle_path, uuid, command, docker_image,
+    def start_container(self, bundle_path, uuid, command, tags,
                         network_name, dependencies, cpuset, gpuset, memory_bytes=0):
 
         # Impose a minimum container request memory 4mb, same as docker's minimum allowed value
@@ -446,12 +446,12 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         # access to the host machine's memory, which we have decided to not allow
         if memory_bytes < parse_size('4m'):
             raise DockerException('Minimum memory must be 4m ({} bytes)'.format(parse_size('4m')))
-
+        """
         docker_commands = self._get_docker_commands(
             bundle_path, uuid, command, docker_image, dependencies)
-
+        """
         volume_bindings = self._get_volume_bindings(
-            bundle_path, uuid, command, docker_image, dependencies)
+            bundle_path, uuid, command, tags[0], dependencies)
 
         # Get user/group that owns the bundle directory
         # Then we can ensure that any created files are owned by the user/group
@@ -460,6 +460,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         uid = bundle_stat.st_uid
         gid = bundle_stat.st_gid
 
+        """
         docker_bundle_path = '/' + uuid
 
         # Create the container.
@@ -479,7 +480,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             # This can cause problems if users expect to run as a specific user
             'User': '%s:%s' % (uid, gid),
         }
-        """
+        
         if self._use_nvidia_docker:
             # Allocate the requested number of GPUs and isolate
             self._add_nvidia_docker_arguments(create_request, [str(k) for k in gpuset])
@@ -531,32 +532,30 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             # print(new_command)
             pat = re.compile("{{\w+}}")
 
-            f = open(bundle_path + '/' + 'codalab.sh', 'w')
-            if new_command[0] == "qsub":
-                bash = open(new_command[1], "r")
-                for line in bash.readlines():
-                    if pat.search(line):
-                        b_name = pat.findall(line)[0][2:-2]
-                        new_line = pat.sub(bds[b_name], line)
-                        f.write(new_line)
-                    else:
-                        f.write(line)
+            with open(bundle_path + '/' + 'codalab.sh', 'w') as f:
+                if new_command[0] == "qsub":
+                    bash = open(new_command[1], "r")
+                    for line in bash.readlines():
+                        if pat.search(line):
+                            b_name = pat.findall(line)[0][2:-2]
+                            new_line = pat.sub(bds[b_name], line)
+                            f.write(new_line)
+                        else:
+                            f.write(line)
 
-                # f.write(bash)
-            else:
-                f.write('#!/usr/bin/env bash\n\n')
-                if len(args) > 0:
-                    f.write('#$ ' + args + '\n\n')
+                    # f.write(bash)
                 else:
-                    f.write('#$ -P other -cwd -pe mt 2\n\n')
-                f.write('source ~/.bashrc\n')
-                f.write('source activate base\n\n')
-                f.write(' '.join(new_command))
-            # f.write(new_command)
-            f.close()
+                    f.write('#!/usr/bin/env bash\n\n')
+                    if len(args) > 0:
+                        f.write('#$ ' + args + '\n\n')
+                    else:
+                        f.write('#$ -P other -cwd -pe mt 2\n\n')
+                    f.write('source ~/.bashrc\n')
+                    f.write('source activate base\n\n')
+                    f.write(' '.join(new_command))
 
-            # run = ['qsub', '-P', 'other', '-cwd', '-pe', 'mt', cpu, '-l', 'h_vmem='+ram+'G,gpu='+gpu+',h_rt='+times+':00:00',
-            #       bundle_path + '/' + 'codalab.sh']
+            print(tags[0])
+
             run = ['qsub', bundle_path + '/' + 'codalab.sh']
 
             p = subprocess.Popen(run, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -647,13 +646,11 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         except:
             stdout = open(bundle_path + "/codalab.sh.o" + job_id, "r").read()
         stderr = open(bundle_path + "/codalab.sh.e" + job_id, "r").read()
-        fo = open(bundle_path + "/stdout", "w")
-        fo.write(stdout)
-        fe = open(bundle_path + "/stderr", "w")
-        if stderr is not None:
-            fe.write(stderr)
-        fo.close()
-        fe.close()
+        with open(bundle_path + "/stdout", "w") as fo:
+            fo.write(stdout)
+        with open(bundle_path + "/stderr", "w") as fe:
+            if stderr is not None:
+                fe.write(stderr)
 
         return (True, 0, None)
         """

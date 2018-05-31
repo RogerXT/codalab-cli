@@ -1362,8 +1362,8 @@ class BundleCLI(object):
             metadata_update['name'] = args.name
         if args.description:
             metadata_update['description'] = args.description
-        if args.tags:
-            metadata_update['tags'] = args.tags
+        #if args.tags:
+        #    metadata_update['tags'] = args.tags
         if args.anonymous is not None:
             bundle_update['is_anonymous'] = args.anonymous
 

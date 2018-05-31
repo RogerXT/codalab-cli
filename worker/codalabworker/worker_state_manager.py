@@ -33,7 +33,7 @@ class WorkerStateManager(object):
         if not self.shared_file_system: # disable saving Run states on shared file systems until we are sure it works
             if not os.path.exists(self._state_file):
                 if not os.path.exists(work_dir):
-                    os.makedirs(work_dir, 0770)
+                    os.makedirs(work_dir, 0755)
                 self.save_state()
             self.load_state()
 
