@@ -516,9 +516,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                         if name + "/" in new_command[i]:
                             new_command[i] = new_command[i].replace(name, path, 1)
 
-            # print(new_command)
-            #name = tags[0]
-            name = "harry"
+            name = tags[0]
             owner = subprocess.Popen(["chown", "-R", name, bundle_path])
 
             cmds = ["sudo", "-u", name] + new_command
@@ -528,7 +526,6 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             self.bundle_paths[uuid] = bundle_path
 
             out, err = p.communicate()
-            # errcode = p.returncode
             with open(bundle_path + "/stdout", "w") as fo:
                 fo.write(out)
 
