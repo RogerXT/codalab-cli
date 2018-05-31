@@ -35,8 +35,10 @@ class DependencyManager(object):
             self._load_state(previous_runs)
         else:
             remove_path(self._work_dir)
-            os.makedirs(self._work_dir, 0770)
-            os.makedirs(self._bundles_dir, 0770)
+            #os.makedirs(self._work_dir, 0770)
+            #os.makedirs(self._bundles_dir, 0770)
+            os.makedirs(self._work_dir, 0755)
+            os.makedirs(self._bundles_dir, 0755)
             self._save_state()
 
     def _load_state(self, previous_runs):

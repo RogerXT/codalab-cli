@@ -66,6 +66,7 @@ class DockerClient(object):
 
     def __init__(self):
         self.bundle_state = {}
+        self.bundle_paths = {}
 
         self._docker_host = os.environ.get('DOCKER_HOST') or None
         if self._docker_host:
@@ -504,7 +505,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             for bundle in bundles:
                 path = str(bundle[0])
                 name = str(bundle[1].split("/")[-1])
-                permit = subprocess.Popen(["chmod", "-R", "o+rx", path])
+                # permit = subprocess.Popen(["chmod", "-R", "o+rx", path])
 
                 if name in new_command:    # file name
                     for i in range(len(new_command)):
@@ -516,26 +517,24 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                             new_command[i] = new_command[i].replace(name, path, 1)
 
             # print(new_command)
-            name = tags[0]
-            parent_path = "/".join(bundle_path.split("/")[:2])
-            print(parent_path)
-            permit = subprocess.Popen(["chmod", "-R", "o+rx", parent_path])
-            permit = subprocess.Popen(["chmod", "-R", "777", bundle_path])
+            #name = tags[0]
+            name = "harry"
+            owner = subprocess.Popen(["chown", "-R", name, bundle_path])
 
-            cmds = ["sudo", "-u", "harry"] + new_command
+            cmds = ["sudo", "-u", name] + new_command
 
             p = subprocess.Popen(cmds, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             self.bundle_state[uuid] = p
+            self.bundle_paths[uuid] = bundle_path
 
             out, err = p.communicate()
             # errcode = p.returncode
-            fo = open(bundle_path + "/stdout", "w")
-            fo.write(out)
-            fe = open(bundle_path + "/stderr", "w")
-            if err is not None:
-                fe.write(err)
-            fo.close()
-            fe.close()
+            with open(bundle_path + "/stdout", "w") as fo:
+                fo.write(out)
+
+            with open(bundle_path + "/stderr", "w") as fe:
+                if err is not None:
+                    fe.write(err)
 
         """
         with closing(self._create_connection()) as start_conn:
@@ -603,7 +602,12 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         if self.bundle_state[container_id].poll() is None:
             return (False, None, None)
         time.sleep(0.3)
+        if container_id  in self.bundle_paths.keys():
+            owner = subprocess.Popen(["chown", "-R", "root", self.bundle_paths[container_id]])
+            del self.bundle_paths[container_id]
+        del self.bundle_state[container_id]
         return (True, 0, None)
+        """
         with closing(self._create_connection()) as conn:
             conn.request('GET', '/containers/%s/json' % container_id)
             inspect_response = conn.getresponse()
@@ -625,11 +629,16 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                     failure_msg = None
                 return (True, inspect_json['State']['ExitCode'], failure_msg)
             return (False, None, None)
+        """
 
     @wrap_exception('Unable to delete Docker container')
     def delete_container(self, container_id):
         #TODO
-        del self.bundle_state[container_id]
+        try:
+            del self.bundle_state[container_id]
+            del self.bundle_paths[container_id]
+        except:
+            pass
         return
         logger.debug('Deleting container with ID %s', container_id)
         with closing(self._create_connection()) as conn:
