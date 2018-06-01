@@ -44,7 +44,7 @@ def tar_gzip_directory(directory_path, follow_symlinks=False,
         f.write(' '.join(args))
         f.close()
 
-        run = ['qsub', '-P', 'other', '-cwd', '-pe', 'mt', '6', '-l', 'h_vmem=6G,gpu=0,h_rt=24:00:00', zip_path + filename]
+        run = ['sudo', '-u', 'tianxie', 'qsub', '-P', 'other', '-cwd', '-pe', 'mt', '6', '-l', 'h_vmem=6G,gpu=0,h_rt=24:00:00', zip_path + filename]
 
         proc = subprocess.Popen(run, stdout=subprocess.PIPE, cwd=zip_path)
         out, _ = proc.communicate()

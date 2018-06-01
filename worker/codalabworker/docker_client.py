@@ -70,6 +70,7 @@ class DockerClient(object):
     def __init__(self):
         self.bundle_state = {}
         self.bundle_path = {}
+        self.user_name = {}
 
         self._docker_host = os.environ.get('DOCKER_HOST') or None
         if self._docker_host:
@@ -554,7 +555,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                     f.write('source activate base\n\n')
                     f.write(' '.join(new_command))
 
-            run = ['qsub', bundle_path + '/' + 'codalab.sh']
+            run = ['sudo', '-u', name, 'qsub', bundle_path + '/' + 'codalab.sh']
 
             p = subprocess.Popen(run, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
@@ -565,6 +566,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             except:
                 self.bundle_state[uuid] = None
             self.bundle_path[uuid] = bundle_path
+            self.user_name[uuid] = name
 
         """
         with closing(self._create_connection()) as start_conn:
@@ -616,7 +618,8 @@ nvidia-docker-plugin not available, no GPU support on this worker.
     def kill_container(self, container_id):
         # TODO
         logger.debug('Killing container with ID %s', container_id)
-        p = subprocess.Popen(['qdel', self.bundle_state[container_id]], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        name = self.user_name[container_id]
+        p = subprocess.Popen(['sudo', '-u', name, 'qdel', self.bundle_state[container_id]], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
         out, err = p.communicate()
 
@@ -635,7 +638,8 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         if container_id not in self.bundle_state.keys():
             return (True, 1, "No such a bundle.")
         job_id = self.bundle_state[container_id]
-        res = subprocess.Popen(["qstat", "-j", job_id], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        name = self.user_name[container_id]
+        res = subprocess.Popen(["sudo", "-u", name, "qstat", "-j", job_id], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         out, _ = res.communicate()
         if len(out) > 100:
             return (False, None, None)
@@ -684,6 +688,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         logger.debug('Deleting container with ID %s', container_id)
         del self.bundle_state[container_id]
         del self.bundle_path[container_id]
+        del self.user_name[container_id]
         delete_response = "HTTP/1.1 204 No Content"
         return
         """
