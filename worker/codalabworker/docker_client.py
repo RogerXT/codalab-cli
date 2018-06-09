@@ -631,11 +631,10 @@ nvidia-docker-plugin not available, no GPU support on this worker.
     @wrap_exception('Unable to delete Docker container')
     def delete_container(self, container_id):
         #TODO
-        try:
-            del self.bundle_state[container_id]
+        if container_id in self.bundle_paths:
             del self.bundle_paths[container_id]
-        except:
-            pass
+        if container_id in self.bundle_state:
+            del self.bundle_state[container_id]
         return
         logger.debug('Deleting container with ID %s', container_id)
         with closing(self._create_connection()) as conn:

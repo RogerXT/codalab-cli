@@ -56,12 +56,9 @@ from codalab.lib.upload_manager import UploadManager
 from codalab.lib import formatting
 from codalab.model.worker_model import WorkerModel
 
-try:
-    MAIN_BUNDLE_SERVICE = os.environ['MAIN_BUNDLE_SERVICE']
-except:
-    print('Please export MAIN_BUNDLE_SERVICE=http://bundle_service_host\n')
-    MAIN_BUNDLE_SERVICE = None
-
+MAIN_BUNDLE_SERVICE  = os.environ.get('MAIN_BUNDLE_SERVICE')
+if not MAIN_BUNDLE_SERVICE:
+  raise Exception('Please export MAIN_BUNDLE_SERVICE=http://bundle_service_host\n')
 
 def cached(fn):
     def inner(self):
