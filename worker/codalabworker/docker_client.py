@@ -686,15 +686,13 @@ nvidia-docker-plugin not available, no GPU support on this worker.
     def delete_container(self, container_id):
         # TODO
         logger.debug('Deleting container with ID %s', container_id)
-        try:
+        if container_id in self.bundle_state:
             del self.bundle_state[container_id]
+        if container_id in self.bundle_path:
             del self.bundle_path[container_id]
+        if container_id in self.user_name:
             del self.user_name[container_id]
-        except:
-            logger.debug('No container with ID %s', container_id)
 
-
-        delete_response = "HTTP/1.1 204 No Content"
         return
         """
         logger.debug('Deleting container with ID %s', container_id)
