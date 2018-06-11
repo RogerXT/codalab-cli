@@ -37,7 +37,7 @@ def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
         args.extend(['--files-from', '/dev/null'])
     try:
         timing = str(int(time.time()))[-5:]
-        zip_path = '/nas/home/tianxie/zips/'
+        zip_path = "/" + directory_path.split("/")[1] + "/zips/"
         filename = 'zip' + timing + '.sh'
         f = open(zip_path + filename, 'w')
         f.write('#!/usr/bin/env bash\n\n')

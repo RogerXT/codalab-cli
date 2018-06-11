@@ -3,6 +3,7 @@ import logging
 import os
 import threading
 import time
+import subprocess
 
 from file_util import get_path_size, remove_path
 from docker_image_manager import DockerImageManager
@@ -32,14 +33,18 @@ class DependencyManager(object):
         self._dependencies = {}
         self._paths = set()
 
+        if os.path.exists(self._zips_dir):
+            p = subprocess.Popen(['rm', '-rf', self._zips_dir], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
         if os.path.exists(self._state_file):
             self._load_state(previous_runs)
         else:
             remove_path(self._work_dir)
             os.makedirs(self._work_dir, 0755)
             os.makedirs(self._bundles_dir, 0755)
-            os.makedirs(self._zips_dir, 0755)
             self._save_state()
+
+        os.makedirs(self._zips_dir, 0755)
 
     def _load_state(self, previous_runs):
         with open(self._state_file, 'r') as f:
@@ -108,6 +113,12 @@ class DependencyManager(object):
                         first_used_time = dependency.last_used
                         first_used_target = target
                 self._lock.release()
+                if total_size_bytes > self._max_work_dir_size_bytes:
+                    if os.path.exists(self._zips_dir):
+                        p = subprocess.Popen(['rm', '-rf', self._zips_dir], stdin=subprocess.PIPE,
+                                             stdout=subprocess.PIPE)
+                        remove_path(self._zips_dir)
+                    os.makedirs(self._zips_dir, 0755)
 
                 exceeds_size_capacity = total_size_bytes > self._max_work_dir_size_bytes and first_used_target is not None
                 exceeds_length_capacity = len(json.dumps(self.dependencies())) > self._max_dependencies_serialized_length
