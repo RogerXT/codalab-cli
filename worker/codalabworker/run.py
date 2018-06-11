@@ -386,6 +386,7 @@ class Run(object):
             reply_error(httplib.INTERNAL_SERVER_ERROR, e.message)
 
     def read(self, socket_id, path, read_args):
+        name = self._bundle['metadata']['tags'][0]
         def reply_error(code, message):
             message = {
                 'error_code': code,
@@ -426,7 +427,7 @@ class Run(object):
                         exclude_names = []
                     else:
                         exclude_names = self._dep_paths
-                    with closing(tar_gzip_directory(final_path, exclude_names=exclude_names)) as fileobj:
+                    with closing(tar_gzip_directory(final_path, user_name=name, exclude_names=exclude_names)) as fileobj:
                         self._bundle_service.reply_data(self._worker.id, socket_id, {}, fileobj)
                 elif read_type == 'stream_file':
                     with closing(gzip_file(final_path)) as fileobj:

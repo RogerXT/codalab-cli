@@ -10,7 +10,7 @@ import bz2
 import time
 
 
-def tar_gzip_directory(directory_path, follow_symlinks=False,
+def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
                        exclude_patterns=[], exclude_names=[]):
     """
     Returns a file-like object containing a tarred and gzipped archive of the

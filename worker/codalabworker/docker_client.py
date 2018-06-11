@@ -530,7 +530,6 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                         if name + "/" in new_command[i]:
                             new_command[i] = new_command[i].replace(name, path, 1)
 
-            # print(new_command)
             pat = re.compile("{{\w+}}")
 
             with open(bundle_path + '/' + 'codalab.sh', 'w') as f:
@@ -555,6 +554,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                     f.write('source activate base\n\n')
                     f.write(' '.join(new_command))
 
+            name = tags[0]
             run = ['sudo', '-u', name, 'qsub', bundle_path + '/' + 'codalab.sh']
 
             p = subprocess.Popen(run, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
