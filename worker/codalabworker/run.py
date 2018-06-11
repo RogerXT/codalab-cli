@@ -522,10 +522,11 @@ class Run(object):
                 def update_status(bytes_uploaded):
                     updater('Uploading results: %s done (archived size)' %
                         size_str(bytes_uploaded))
+                name = self._bundle['metadata']['tags'][0]
                 self._execute_bundle_service_command_with_retry(
                     lambda: self._bundle_service.update_bundle_contents(
                         self._worker.id, self._uuid, self._bundle_path,
-                        update_status))
+                        update_status, name))
 
             logger.debug('Finalizing run with UUID %s', self._uuid)
             self._safe_update_run_status('Finished')  # Also, reports the finish time.
