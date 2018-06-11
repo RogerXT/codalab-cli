@@ -148,8 +148,8 @@ class BundleServiceClient(RestClient):
             data=new_metadata)
 
     @wrap_exception('Unable to update bundle contents in bundle service')
-    def update_bundle_contents(self, worker_id, uuid, path, progress_callback):
-        with closing(tar_gzip_directory(path)) as fileobj:
+    def update_bundle_contents(self, worker_id, uuid, path, progress_callback, user_name):
+        with closing(tar_gzip_directory(path, user_name)) as fileobj:
             self._upload_with_chunked_encoding(
                 'PUT', '/bundles/' + uuid + '/contents/blob/',
                 query_params={'filename': 'bundle.tar.gz'}, fileobj=fileobj,

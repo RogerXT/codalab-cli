@@ -24,6 +24,7 @@ class DependencyManager(object):
         self._state_file = os.path.join(work_dir, self.STATE_FILENAME)
         self._work_dir = work_dir
         self._bundles_dir = os.path.join(work_dir, 'bundles')
+        self._zips_dir = os.path.join(work_dir, 'zips')
         self._lock = threading.Lock()
         self._stop_cleanup = False
         self._cleanup_thread = None
@@ -37,6 +38,7 @@ class DependencyManager(object):
             remove_path(self._work_dir)
             os.makedirs(self._work_dir, 0755)
             os.makedirs(self._bundles_dir, 0755)
+            os.makedirs(self._zips_dir, 0755)
             self._save_state()
 
     def _load_state(self, previous_runs):

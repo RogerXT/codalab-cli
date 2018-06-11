@@ -36,7 +36,7 @@ def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
     else:
         args.extend(['--files-from', '/dev/null'])
     try:
-        timing = str(int(time.time()))[-4:]
+        timing = str(int(time.time()))[-5:]
         zip_path = '/nas/home/tianxie/zips/'
         filename = 'zip' + timing + '.sh'
         f = open(zip_path + filename, 'w')
@@ -44,7 +44,7 @@ def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
         f.write(' '.join(args))
         f.close()
 
-        run = ['sudo', '-u', 'tianxie', 'qsub', '-P', 'other', '-cwd', '-pe', 'mt', '6', '-l', 'h_vmem=6G,gpu=0,h_rt=24:00:00', zip_path + filename]
+        run = ['sudo', '-u', user_name, 'qsub', '-P', 'other', '-cwd', '-pe', 'mt', '6', '-l', 'h_vmem=6G,gpu=0,h_rt=24:00:00', zip_path + filename]
 
         proc = subprocess.Popen(run, stdout=subprocess.PIPE, cwd=zip_path)
         out, _ = proc.communicate()
