@@ -10,6 +10,7 @@ import sys
 import subprocess
 import time
 import re
+from shutil import copy2
 
 from formatting import size_str, parse_size
 
@@ -647,15 +648,10 @@ nvidia-docker-plugin not available, no GPU support on this worker.
 
         bundle_path = self.bundle_path[container_id]
         try:
-            stdout = open(bundle_path + "/result.txt", "r").read()
+            copy2(bundle_path + "/result.txt", bundle_path + "/stdout")
         except:
-            stdout = open(bundle_path + "/codalab.sh.o" + job_id, "r").read()
-        stderr = open(bundle_path + "/codalab.sh.e" + job_id, "r").read()
-        with open(bundle_path + "/stdout", "w") as fo:
-            fo.write(stdout)
-        with open(bundle_path + "/stderr", "w") as fe:
-            if stderr is not None:
-                fe.write(stderr)
+            copy2(bundle_path + "/codalab.sh.o" + job_id, bundle_path + "/stdout")
+        copy2(bundle_path + "/codalab.sh.e" + job_id, bundle_path + "/stderr")
 
         return (True, 0, None)
         """
