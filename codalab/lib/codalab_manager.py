@@ -182,7 +182,7 @@ class CodaLabManager(object):
                 'verbose': 1,
             },
             'server': {
-                'rest_host': 'localhost',
+                'rest_host': '0.0.0.0',
                 'rest_port': 2900,
                 'class': 'MySQLModel',
                 'engine_url': 'mysql://codalab@localhost:3306/codalab_bundles',

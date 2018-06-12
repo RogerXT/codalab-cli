@@ -248,8 +248,7 @@ def dummy_xmlrpc_app():
 
 def run_rest_server(manager, debug, num_processes, num_threads):
     """Runs the REST server."""
-    #host = manager.config['server']['rest_host']
-    host = unicode('0.0.0.0')
+    host = manager.config['server']['rest_host']
     port = manager.config['server']['rest_port']
 
     install(SaveEnvironmentPlugin(manager))
