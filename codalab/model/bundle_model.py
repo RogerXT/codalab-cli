@@ -1222,11 +1222,13 @@ class BundleModel(object):
         worksheet.validate()
         with self.engine.begin() as connection:
             if 'tags' in info:
+                """
                 # Delete old tags
                 result = connection.execute(cl_worksheet_tag.delete().where(cl_worksheet_tag.c.worksheet_uuid == worksheet.uuid))
                 # Add new tags
                 new_tag_values = [{'worksheet_uuid': worksheet.uuid, 'tag': tag} for tag in info['tags']]
                 self.do_multirow_insert(connection, cl_worksheet_tag, new_tag_values)
+                """
                 del info['tags']
             if len(info) > 0:
                 connection.execute(cl_worksheet.update().where(
