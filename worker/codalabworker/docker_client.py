@@ -547,22 +547,14 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                     # f.write(bash)
                 else:
                     f.write('#!/usr/bin/env bash\n\n')
-                    """
-                    if len(args) > 0:
-                        f.write('#$ ' + args + '\n\n')
-                    else:
-                        f.write('#$ -P other -cwd -pe mt 2\n\n')
-                    """
-                    f.write('source ~/.bashrc\n')
-                    f.write('source activate base\n\n')
                     f.write(' '.join(new_command))
 
             name = tags[0]
             if new_command[0] == "qsub":
-                run = ['sudo', '-u', name, 'qsub', bundle_path + '/' + 'codalab.sh'] + new_command[2:] + args.split()
+                run = ['sudo', '-u', name, 'qsub'] + args.split() + [bundle_path + '/' + 'codalab.sh'] + new_command[2:]
 
             else:
-                run = ['sudo', '-u', name, 'qsub', bundle_path + '/' + 'codalab.sh'] + args.split()
+                run = ['sudo', '-u', name, 'qsub'] + args.split() + [bundle_path + '/' + 'codalab.sh']
 
             p = subprocess.Popen(run, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
