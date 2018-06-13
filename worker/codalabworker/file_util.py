@@ -8,6 +8,7 @@ import tarfile
 import zlib
 import bz2
 import time
+from docker_client import qsub_job
 
 
 def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
@@ -44,7 +45,9 @@ def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
         f.write(' '.join(args))
         f.close()
 
-        run = ['sudo', '-u', user_name, 'qsub', '-P', 'other', '-cwd', '-pe', 'mt', '1', '-l', 'h_vmem=4G,gpu=0,h_rt=24:00:00', zip_path + filename]
+        q_args = "-P other -cwd -pe mt 1 -l h_vmem=4G,gpu=0,h_rt=24:00:00"
+        zipsh_name = zip_path + filename
+        run = qsub_job(user_name, zipsh_name, q_args)
 
         proc = subprocess.Popen(run, stdout=subprocess.PIPE, cwd=zip_path)
         out, _ = proc.communicate()

@@ -16,6 +16,16 @@ from formatting import size_str, parse_size
 
 logger = logging.getLogger(__name__)
 
+def qsub_job(name, file, args='', args_o=''):
+    return ['su', name, '-c', '\"qsub ' + args + ' ' + file + ' ' + args_o + '\"']
+
+def qstat_job(name, job_id):
+    res = subprocess.Popen(['su', name, '-c', '\"qstat -j ' + job_id + '\"'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    return res.communicate()
+
+def qdel_job(name, job_id):
+    res = subprocess.Popen(['su', name, '-c', '\"qdel ' + job_id + '\"'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    return res.communicate()
 
 def wrap_exception(message):
     def decorator(f):
@@ -550,12 +560,13 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                     f.write(' '.join(new_command))
 
             name = tags[0]
+            file_name = bundle_path + '/codalab.sh'
             if new_command[0] == "qsub":
-                run = ['sudo', '-u', name, 'qsub'] + args.split() + [bundle_path + '/' + 'codalab.sh'] + new_command[2:]
+                args_o = ' '.join(new_command[2:])
+                run = qsub_job(name, file_name, args, args_o)
 
             else:
-                run = ['sudo', '-u', name, 'qsub'] + args.split() + [bundle_path + '/' + 'codalab.sh']
-
+                run = qsub_job(name, file_name, args)
             p = subprocess.Popen(run, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
             out, err = p.communicate()
@@ -618,9 +629,8 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         # TODO
         logger.debug('Killing container with ID %s', container_id)
         name = self.user_name[container_id]
-        p = subprocess.Popen(['sudo', '-u', name, 'qdel', self.bundle_state[container_id]], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-
-        out, err = p.communicate()
+        job_id = self.bundle_state[container_id]
+        out, err = qdel_job(name, job_id)
 
         """
         logger.debug('Killing container with ID %s', container_id)
@@ -638,8 +648,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             return (True, 1, "No such a bundle.")
         job_id = self.bundle_state[container_id]
         name = self.user_name[container_id]
-        res = subprocess.Popen(["sudo", "-u", name, "qstat", "-j", job_id], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        out, _ = res.communicate()
+        out, _ = qstat_job(name, job_id)
         if len(out) > 100:
             return (False, None, None)
         time.sleep(0.3)
