@@ -27,6 +27,9 @@ def qdel_job(name, job_id):
     res = subprocess.Popen(['su', name, '-c', '\"qdel ' + job_id + '\"'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     return res.communicate()
 
+def owner(name, path):
+    return subprocess.Popen(["chown", "-R", name, path])
+
 def is_text(path):
     res = subprocess.Popen(['file', path], stdout=subprocess.PIPE)
     out, _ = res.communicate()
@@ -581,7 +584,9 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                         f.write('#$ -P other -cwd -pe mt 2\n\n')
                     f.write(' '.join(new_command))
 
+            time.sleep(0.1)
             name = tags[0]
+            own = owner(name, bundle_path)
             file_name = bundle_path + '/codalab.sh'
 
             run = qsub_job(name, file_name, args, args_o)
@@ -649,6 +654,9 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         name = self.user_name[container_id]
         job_id = self.bundle_state[container_id]
         out, err = qdel_job(name, job_id)
+        if container_id in self.bundle_path:
+            own = owner("root", self.bundle_path[container_id])
+            del self.bundle_path[container_id]
 
         """
         logger.debug('Killing container with ID %s', container_id)
@@ -678,6 +686,10 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             copy2(bundle_path + "/codalab.sh.o" + job_id, bundle_path + "/stdout")
         copy2(bundle_path + "/codalab.sh.e" + job_id, bundle_path + "/stderr")
 
+        if container_id in self.bundle_path:
+            own = owner("root", self.bundle_path[container_id])
+            del self.bundle_path[container_id]
+        del self.bundle_state[container_id]
         return (True, 0, None)
         """
         with closing(self._create_connection()) as conn:
