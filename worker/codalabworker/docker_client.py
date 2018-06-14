@@ -567,10 +567,18 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                         args_o = ' '.join(new_command[1:])
                     else:
                         f.write('#!/usr/bin/env bash\n\n')
+                        if len(args) > 0:
+                            f.write('#$ ' + args + '\n\n')
+                        else:
+                            f.write('#$ -P other -cwd -pe mt 2\n\n')
                         f.write(' '.join(new_command))
 
                 else:
                     f.write('#!/usr/bin/env bash\n\n')
+                    if len(args) > 0:
+                        f.write('#$ ' + args + '\n\n')
+                    else:
+                        f.write('#$ -P other -cwd -pe mt 2\n\n')
                     f.write(' '.join(new_command))
 
             name = tags[0]
