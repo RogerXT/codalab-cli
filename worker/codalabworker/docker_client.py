@@ -27,6 +27,15 @@ def qdel_job(name, job_id):
     res = subprocess.Popen(['su', name, '-c', '\"qdel ' + job_id + '\"'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     return res.communicate()
 
+def is_text(path):
+    res = subprocess.Popen(['file', path], stdout=subprocess.PIPE)
+    out, _ = res.communicate()
+    pat = re.compile("text")
+    if pat.search(out) is None:
+        return False
+    else:
+        return True
+
 def wrap_exception(message):
     def decorator(f):
         def wrapper(*args, **kwargs):
@@ -543,30 +552,31 @@ nvidia-docker-plugin not available, no GPU support on this worker.
 
             pat = re.compile("{{\w+}}")
 
+            args_o = ''
             with open(bundle_path + '/' + 'codalab.sh', 'w') as f:
-                if new_command[0] == "qsub":
-                    bash = open(new_command[1], "r")
-                    for line in bash.readlines():
-                        if pat.search(line):
-                            b_name = pat.findall(line)[0][2:-2]
-                            new_line = pat.sub(bds[b_name], line)
-                            f.write(new_line)
-                        else:
-                            f.write(line)
+                if os.path.exists(new_command[0]):
+                    if is_text(new_command[0]):
+                        script = open(new_command[0], "r")
+                        for line in script.readlines():
+                            if pat.search(line):
+                                b_name = pat.findall(line)[0][2:-2]
+                                new_line = pat.sub(bds[b_name], line)
+                                f.write(new_line)
+                            else:
+                                f.write(line)
+                        args_o = ' '.join(new_command[1:])
+                    else:
+                        f.write('#!/usr/bin/env bash\n\n')
+                        f.write(' '.join(new_command))
 
-                    # f.write(bash)
                 else:
                     f.write('#!/usr/bin/env bash\n\n')
                     f.write(' '.join(new_command))
 
             name = tags[0]
             file_name = bundle_path + '/codalab.sh'
-            if new_command[0] == "qsub":
-                args_o = ' '.join(new_command[2:])
-                run = qsub_job(name, file_name, args, args_o)
 
-            else:
-                run = qsub_job(name, file_name, args)
+            run = qsub_job(name, file_name, args, args_o)
             p = subprocess.Popen(run, cwd=bundle_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
             out, err = p.communicate()

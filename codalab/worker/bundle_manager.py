@@ -17,6 +17,8 @@ from codalabworker.file_util import remove_path
 logger = logging.getLogger(__name__)
 
 WORKER_TIMEOUT_SECONDS = 30
+JOB_TIMEOUT_SECONDS = 115200
+
 
 class BundleManager(object):
     """
@@ -259,7 +261,7 @@ class BundleManager(object):
                 self._model.set_offline_bundle(bundle)
 
             if (not workers.is_running(bundle.uuid) or  # Dead worker.
-                time.time() - bundle.metadata.last_updated > 115200):
+                time.time() - bundle.metadata.last_updated > JOB_TIMEOUT_SECONDS):
                 failure_message = 'Worker offline'
                 logger.info('Bringing bundle offline %s: %s', bundle.uuid, failure_message)
                 self._model.set_offline_bundle(bundle)
