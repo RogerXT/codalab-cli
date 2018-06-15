@@ -42,12 +42,12 @@ def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
         filename = 'zip' + timing + '.sh'
         f = open(zip_path + filename, 'w')
         f.write('#!/usr/bin/env bash\n\n')
+        f.write('#$ -P other -cwd -pe mt 2 -l h_vmem=4G,gpu=0,h_rt=24:00:00\n\n')
         f.write(' '.join(args))
         f.close()
 
-        q_args = "-P other -cwd -pe mt 1 -l h_vmem=4G,gpu=0,h_rt=24:00:00"
         zipsh_name = zip_path + filename
-        run = qsub_job(user_name, zipsh_name, q_args)
+        run = qsub_job(user_name, zipsh_name)
 
         proc = subprocess.Popen(run, stdout=subprocess.PIPE, cwd=zip_path)
         out, _ = proc.communicate()
