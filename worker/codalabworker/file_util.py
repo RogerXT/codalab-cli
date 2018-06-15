@@ -41,10 +41,11 @@ def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
         zip_dir = "/".join(directory_path.split("/")[:-2]) + "/zips/"
         zip_path = os.path.join(zip_dir, timing)
         os.makedirs(zip_path, 0755)
+        zip_path += "/"
         own = owner(user_name, zip_path)
 
         filename = 'zip' + timing + '.sh'
-        f = open(zip_path + "/" + filename, 'w')
+        f = open(zip_path + filename, 'w')
         f.write('#!/usr/bin/env bash\n\n')
         f.write('#$ -P other -cwd -pe mt 2 -l h_vmem=4G,gpu=0,h_rt=24:00:00\n\n')
         f.write(' '.join(args))
