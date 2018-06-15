@@ -33,7 +33,11 @@ def owner(name, path):
 def is_text(path):
     res = subprocess.Popen(['file', path], stdout=subprocess.PIPE)
     out, _ = res.communicate()
-    return 'text' in out.split()
+    pat = re.compile("text")
+    if pat.search(out) is None:
+        return False
+    else:
+        return True
 
 def wrap_exception(message):
     def decorator(f):
