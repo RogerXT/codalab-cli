@@ -17,14 +17,14 @@ from formatting import size_str, parse_size
 logger = logging.getLogger(__name__)
 
 def qsub_job(name, file, args='', args_o=''):
-    return ['su', name, '-c', '\"qsub ' + args + ' ' + file + ' ' + args_o + '\"']
+    return ['su', name, '-c', 'qsub ' + args + ' ' + file + ' ' + args_o]
 
 def qstat_job(name, job_id):
-    res = subprocess.Popen(['su', name, '-c', '\"qstat -j ' + job_id + '\"'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    res = subprocess.Popen(['su', name, '-c', 'qstat -j ' + job_id], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     return res.communicate()
 
 def qdel_job(name, job_id):
-    res = subprocess.Popen(['su', name, '-c', '\"qdel ' + job_id + '\"'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    res = subprocess.Popen(['su', name, '-c', 'qdel ' + job_id], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     return res.communicate()
 
 def owner(name, path):
@@ -557,25 +557,16 @@ nvidia-docker-plugin not available, no GPU support on this worker.
 
             args_o = ''
             with open(bundle_path + '/' + 'codalab.sh', 'w') as f:
-                if os.path.exists(new_command[0]):
-                    if is_text(new_command[0]):
-                        script = open(new_command[0], "r")
-                        for line in script.readlines():
-                            if pat.search(line):
-                                b_name = pat.findall(line)[0][2:-2]
-                                new_line = pat.sub(bds[b_name], line)
-                                f.write(new_line)
-                            else:
-                                f.write(line)
-                        args_o = ' '.join(new_command[1:])
-                    else:
-                        f.write('#!/usr/bin/env bash\n\n')
-                        if len(args) > 0:
-                            f.write('#$ ' + args + '\n\n')
+                if os.path.exists(new_command[0]) and is_text(new_command[0]):
+                    script = open(new_command[0], "r")
+                    for line in script.readlines():
+                        if pat.search(line):
+                            b_name = pat.findall(line)[0][2:-2]
+                            new_line = pat.sub(bds[b_name], line)
+                            f.write(new_line)
                         else:
-                            f.write('#$ -P other -cwd -pe mt 2\n\n')
-                        f.write(' '.join(new_command))
-
+                            f.write(line)
+                    args_o = ' '.join(new_command[1:])
                 else:
                     f.write('#!/usr/bin/env bash\n\n')
                     if len(args) > 0:
@@ -655,7 +646,6 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         job_id = self.bundle_state[container_id]
         out, err = qdel_job(name, job_id)
         if container_id in self.bundle_path:
-            own = owner("root", self.bundle_path[container_id])
             del self.bundle_path[container_id]
 
         """
@@ -687,7 +677,6 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         copy2(bundle_path + "/codalab.sh.e" + job_id, bundle_path + "/stderr")
 
         if container_id in self.bundle_path:
-            own = owner("root", self.bundle_path[container_id])
             del self.bundle_path[container_id]
         del self.bundle_state[container_id]
         return (True, 0, None)
