@@ -8,7 +8,7 @@ import tarfile
 import zlib
 import bz2
 import time
-from docker_client import qsub_job
+from docker_client import qsub_job, owner
 
 
 def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
@@ -37,10 +37,14 @@ def tar_gzip_directory(directory_path, user_name=None, follow_symlinks=False,
     else:
         args.extend(['--files-from', '/dev/null'])
     try:
-        timing = str(int(time.time()))[-5:]
-        zip_path = "/".join(directory_path.split("/")[:-2]) + "/zips/"
+        timing = str(int(time.time()))[-5:] + str(directory_path)[-5:]
+        zip_dir = "/".join(directory_path.split("/")[:-2]) + "/zips/"
+        zip_path = os.path.join(zip_dir, timing)
+        os.makedirs(zip_path, 0755)
+        own = owner(user_name, zip_path)
+
         filename = 'zip' + timing + '.sh'
-        f = open(zip_path + filename, 'w')
+        f = open(zip_path + "/" + filename, 'w')
         f.write('#!/usr/bin/env bash\n\n')
         f.write('#$ -P other -cwd -pe mt 2 -l h_vmem=4G,gpu=0,h_rt=24:00:00\n\n')
         f.write(' '.join(args))
