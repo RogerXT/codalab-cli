@@ -34,7 +34,7 @@ class DependencyManager(object):
         self._paths = set()
 
         if os.path.exists(self._zips_dir):
-            p = subprocess.Popen(['rm', '-rf', self._zips_dir], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            remove_path(self._zips_dir)
 
         if os.path.exists(self._state_file):
             self._load_state(previous_runs)
