@@ -1,6 +1,8 @@
 #!/bin/bash
 # Wrapper around the worker Python code that restarts the worker when upgrading.
 
+source /nas/uge/sge-root/default/common/settings.sh
+
 if ! [ -z "$PBS_JOBID" ]; then
   # For jobs running on Torque, we use the ID to figure out which worker should
   # run which bundle. Additionally, we need to save the stdout and stderr
@@ -11,8 +13,8 @@ if ! [ -z "$PBS_JOBID" ]; then
   WORKER_ARGS="${WORKER_ARGS//|/ }"
 else
   WORKER_CODE_DIR=$(dirname $0)
-  STDOUT=/nas/home/tianxie/codalab_logs/stdout
-  STDERR=/nas/home/tianxie/codalab_logs/stderr
+  STDOUT=/lfs1/home/codalab/codalab_logs/stdout
+  STDERR=/lfs1/home/codalab/codalab_logs/stderr
 fi
 
 while [ 1 ]; do
