@@ -474,9 +474,10 @@ class Run(object):
         if self._is_killed() and not self._docker_container_killed:
             try:
                 self._docker.kill_container(self._container_id)
-                self._docker_container_killed = True
+                # self._docker_container_killed = True
             except DockerException:
                 traceback.print_exc()
+            self._docker_container_killed = True
 
     def _check_and_report_finished(self):
         try:

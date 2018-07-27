@@ -644,7 +644,11 @@ nvidia-docker-plugin not available, no GPU support on this worker.
         logger.debug('Killing container with ID %s', container_id)
         name = self.user_name[container_id]
         job_id = self.bundle_state[container_id]
-        out, err = qdel_job(name, job_id)
+        del self.bundle_state[container_id]
+
+        if job_id is not None:
+            out, err = qdel_job(name, job_id)
+
         if container_id in self.bundle_path:
             del self.bundle_path[container_id]
 
@@ -664,6 +668,10 @@ nvidia-docker-plugin not available, no GPU support on this worker.
             return (True, 1, "No such a bundle.")
         job_id = self.bundle_state[container_id]
         name = self.user_name[container_id]
+
+        if job_id is None:
+            return (True, 1, "No such a bundle.")
+
         out, _ = qstat_job(name, job_id)
         if len(out) > 100:
             return (False, None, None)

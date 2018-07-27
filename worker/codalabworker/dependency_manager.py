@@ -113,7 +113,7 @@ class DependencyManager(object):
                         first_used_time = dependency.last_used
                         first_used_target = target
                 self._lock.release()
-                if total_size_bytes * 2 > self._max_work_dir_size_bytes:
+                if total_size_bytes > self._max_work_dir_size_bytes:
                     self._lock.acquire()
                     if os.path.exists(self._zips_dir):
                         p = subprocess.Popen(['rm', '-rf', self._zips_dir], stdin=subprocess.PIPE,
