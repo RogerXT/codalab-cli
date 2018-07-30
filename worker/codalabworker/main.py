@@ -134,8 +134,11 @@ def parse_cpuset_args(arg):
     Arguments:
         arg: comma seperated string of ints, or "ALL" representing all available cpus
     """
-    #cpu_count = multiprocessing.cpu_count()
-    cpu_count = 16
+    # cpu_count = multiprocessing.cpu_count()
+    if not os.environ.get('NUM_WORKER_THREADS'):
+        raise Exception('Please export NUM_WORKER_THREADS in worker.sh\n')
+    cpu_count = int(os.environ.get('NUM_WORKER_THREADS'))
+
     if arg == 'ALL':
         cpuset = range(cpu_count)
     else:

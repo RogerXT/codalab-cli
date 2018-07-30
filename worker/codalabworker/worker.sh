@@ -3,6 +3,8 @@
 
 source /nas/uge/sge-root/default/common/settings.sh
 
+NUM_WORKER_THREADS=48
+
 if ! [ -z "$PBS_JOBID" ]; then
   # For jobs running on Torque, we use the ID to figure out which worker should
   # run which bundle. Additionally, we need to save the stdout and stderr
