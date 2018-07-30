@@ -241,9 +241,8 @@ class BundleManager(object):
         """
         for bundle in self._model.batch_get_bundles(state=State.STARTING, bundle_type='run'):
             if (not workers.is_running(bundle.uuid) or  # Dead worker.
-                time.time() - bundle.metadata.last_updated > 5): # * 60):  # Run message went missing.
+                time.time() - bundle.metadata.last_updated > 60):  # Run message went missing.
                 logger.info('Re-staging run bundle %s', bundle.uuid)
-                logger.info(str(workers.is_running(bundle.uuid)))
                 if self._model.restage_bundle(bundle):
                     workers.restage(bundle.uuid)
 
