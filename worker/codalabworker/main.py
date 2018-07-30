@@ -134,7 +134,8 @@ def parse_cpuset_args(arg):
     Arguments:
         arg: comma seperated string of ints, or "ALL" representing all available cpus
     """
-    cpu_count = multiprocessing.cpu_count()
+    #cpu_count = multiprocessing.cpu_count()
+    cpu_count = 16
     if arg == 'ALL':
         cpuset = range(cpu_count)
     else:
