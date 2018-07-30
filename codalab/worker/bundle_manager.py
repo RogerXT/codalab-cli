@@ -282,7 +282,6 @@ class BundleManager(object):
             # workers_list = self._filter_and_sort_workers(workers_list, bundle)
 
             for worker in workers_list:
-                time.sleep(0.5)
                 if self._try_start_bundle(workers, worker, bundle):
                     break
                 else:
