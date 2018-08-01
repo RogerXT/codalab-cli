@@ -48,6 +48,8 @@ class BundleManager(object):
         self._make_uuids_lock = threading.Lock()
         self._make_uuids = set()
 
+        self._worker_model.shared_file_system = True
+
         def parse(to_value, field):
             return to_value(config[field]) if field in config else None
         self._max_request_time = parse(formatting.parse_duration, 'max_request_time')
@@ -375,7 +377,7 @@ class BundleManager(object):
         """
         if self._model.set_starting_bundle(bundle, worker['user_id'], worker['worker_id']):
             workers.set_starting(bundle.uuid, worker)
-            if self._worker_model.shared_file_system and worker['user_id'] == self._model.root_user_id:
+            if self._worker_model.shared_file_system: #and worker['user_id'] == self._model.root_user_id:
                 # On a shared file system we create the path here to avoid NFS
                 # directory cache issues.
                 path = self._bundle_store.get_bundle_location(bundle.uuid)
@@ -445,7 +447,7 @@ class BundleManager(object):
         message = {}
         message['type'] = 'run'
         message['bundle'] = bundle_util.bundle_to_bundle_info(self._model, bundle)
-        if self._worker_model.shared_file_system and worker['user_id'] == self._model.root_user_id:
+        if self._worker_model.shared_file_system: # and worker['user_id'] == self._model.root_user_id:
             message['bundle']['location'] = self._bundle_store.get_bundle_location(bundle.uuid)
             for dependency in message['bundle']['dependencies']:
                 dependency['location'] = self._bundle_store.get_bundle_location(dependency['parent_uuid'])
