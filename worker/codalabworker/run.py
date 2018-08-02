@@ -273,10 +273,9 @@ class Run(object):
 
         REPORT_FREQ_SECS = 5.0
         last_report_time = 0
+        time.sleep(0.2)
         while True:
             self._handle_kill()
-            if self._check_and_report_finished():
-                break
 
             if time.time() - last_report_time >= REPORT_FREQ_SECS:
                 report = True
@@ -284,6 +283,9 @@ class Run(object):
             else:
                 report = False
             self._check_and_report_resource_utilization(report)
+
+            if self._check_and_report_finished():
+                break
 
             try:
                 self._send_resume_message()
@@ -300,26 +302,26 @@ class Run(object):
 
     def _check_and_report_resource_utilization(self, report):
         new_metadata = {}
-        #TODO
-        return
         # Get wall clock time.
         new_metadata['time'] = time.time() - self._start_time
         if (self._resources['request_time'] and new_metadata['time'] > self._resources['request_time']):
             self.kill('Time limit %s exceeded.' % duration_str(self._resources['request_time']))
 
         # Get memory, time_user and time_system.
+        """
         new_metadata.update(self._docker.get_container_stats(self._container_id))
         if 'memory' in new_metadata and new_metadata['memory'] > self._max_memory:
             self._max_memory = new_metadata['memory']
         new_metadata['memory_max'] = self._max_memory
-
+        """
         # Get disk utilization.
         with self._disk_utilization_lock:
             new_metadata['data_size'] = self._disk_utilization
+        """
         if (self._resources['request_disk'] and
             new_metadata['data_size'] > self._resources['request_disk']):
             self.kill('Disk limit %sb exceeded.' % size_str(self._resources['request_disk']))
-
+        """
         new_metadata['last_updated'] = int(time.time())
 
         if report:
