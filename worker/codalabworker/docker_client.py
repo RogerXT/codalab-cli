@@ -553,7 +553,7 @@ nvidia-docker-plugin not available, no GPU support on this worker.
                         if name + "/" in new_command[i]:
                             new_command[i] = new_command[i].replace(name, path, 1)
 
-            pat = re.compile("{{\w+}}")
+            pat = re.compile("{{[\w\W]+}}")
 
             args_o = ''
             with open(bundle_path + '/' + 'codalab.sh', 'w') as f:
